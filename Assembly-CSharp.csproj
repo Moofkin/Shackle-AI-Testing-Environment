@@ -48,6 +48,7 @@
      <Compile Include="Assets\Scripts\spt_angerObject.cs" />
      <Compile Include="Assets\Scripts\spt_baseAngerClass.cs" />
      <Compile Include="Assets\Scripts\spt_createGraphForTestingEnvironment.cs" />
+     <Compile Include="Assets\Scripts\spt_flashlightClass.cs" />
      <Compile Include="Assets\Scripts\spt_monsterMovement.cs" />
      <None Include="Assets\Standard Assets\CrossPlatformInput\CrossPlatformInputGuidelines.txt" />
      <None Include="Assets\Standard Assets\Characters\ThirdPersonCharacter\ThirdPersonCharacterGuidelines.txt" />

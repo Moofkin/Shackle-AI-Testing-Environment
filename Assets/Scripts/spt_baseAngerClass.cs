@@ -8,15 +8,23 @@ using System.Collections;
 
 public class spt_baseAngerClass{
 
-    // Default anger increase for any action.
-    private int anger = 5;
+    // Default anger increase for any action. This does not take into account extra anger caused by proximity.
+    protected int anger = 5;
 
     // By default, actions cannot be seen by the monster.
-    private bool isVisible = false;
+    protected bool isVisible = false;
 
-    private bool hasBeenSeen = true;
+    // Used to mark if the monster has acknowledged an object becoming visible.
+    protected bool hasBeenSeen = true;
 
-    private Renderer rend;
+    // For actions that cause light. Anger Increase is the amount of additional anger the monster gets per tick of time.
+    //  Duration is the amount of time between these ticks, with a default of zero for non-light producing actions or toggles (used mainly for the flashlight).
+    protected bool hasDuration = false;
+    protected float duration = 0;
+    protected int angerIncrease = 0;
+
+    // For toggling the visibility of standins (for testing purposes).
+    protected Renderer rend;
 
     // Default constructor for this class. Private so that it cannot be used (forces the use of the other constructor).
     private spt_baseAngerClass() { }
@@ -42,6 +50,8 @@ public class spt_baseAngerClass{
         return anger;
     }
 
+    // Toggles the visibility of an object. For all intents and purposes, this is called whenever the players being or stop performing an action
+    //  that angers the monster.
     public void toggleVisibility(){
         if (isVisible){
             setVisible(false);
@@ -54,11 +64,30 @@ public class spt_baseAngerClass{
         }
     }
 
+    // Used to mark if the object has been acknowledged by the monster
     public void markAsSeen(){
         hasBeenSeen = true;
     }
 
+    // Used to find out if the object has been acknowledged by the monster
     public bool getSeen(){
         return hasBeenSeen;
+    }
+
+    // Used to find if this particular action has a duration attatched (does it have persistence like a flashlight shine?).
+    public bool getHasDuration(){
+        return hasDuration;
+    }
+
+    // Gets the time between ticks if there is a duration.
+    //  Deafault is zero if there is no duration.
+    public float getDuration(){
+        return duration;
+    }
+
+    // Gets the per-tick anger increase amount (for actions with durations only).
+    //  Default is zero if there is no duration.
+    public int getAngerIncrease(){
+        return angerIncrease;
     }
 }

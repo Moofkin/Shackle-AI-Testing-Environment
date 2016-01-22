@@ -37,8 +37,15 @@ public class spt_monsterMovement : MonoBehaviour {
         agent = GetComponent<NavMeshAgent>();
         agent.SetDestination(waypoints[26].position);
         currentWaypoint = 26;
+        
+        // Sets the initial anger level of the monster to zero.
         angerLevel = 0;
+        
+        // Handle on the gui (used for testing)
         gui = GameObject.FindWithTag("gui").GetComponent<Text>();
+
+        //Begins the gradual anger depreciation over time.
+        InvokeRepeating("angerDepreciation", 1, 1);
 	}
 	
 	// Update is called once per frame
@@ -49,18 +56,12 @@ public class spt_monsterMovement : MonoBehaviour {
             chooseDestination();
         }
 
-        // Goes through the list of objects that make the monster angry in order to determine if the players have done things it doesn't like.
-        bool nothingInFieldOfView = true;
-        for (int i = 0; i < thingsThatMakeMonsterAngry.Length; i++){
-            if (canSeeSomething(thingsThatMakeMonsterAngry[i].transform)){
-                nothingInFieldOfView = false;
-            }
-        }
-        if (nothingInFieldOfView)
-            print("Cannot see anything");
+        //If the monster is past a certain amount of anger, initiate an attack.
+        if (angerLevel >= 100)
+            attack();
 
+        // Update the GUI with the current anger level of the monster.
         gui.text = ("Anger level: " + angerLevel + "%");
-
 	}
 
     // Used to choose a new destination for the monster based on its current destination (used for wandering).
@@ -73,7 +74,7 @@ public class spt_monsterMovement : MonoBehaviour {
     }
 
     //Determines if the monster can see an object from its current position.
-    bool canSeeSomething(Transform item){
+    public bool canSeeSomething(Transform item){
         RaycastHit hit;
 
         // Position of the monster in 3D space
@@ -97,13 +98,7 @@ public class spt_monsterMovement : MonoBehaviour {
                     // Makes sure the object being looked at is visible to the monster
                     if (hit.collider.gameObject.GetComponent<spt_angerObject>().getData().getVisible()){
                         print("Can see " + hit.collider.gameObject.name);
-                        if (hit.collider.gameObject.GetComponent<spt_angerObject>().getData().getSeen() == false){
-                            hit.collider.gameObject.GetComponent<spt_angerObject>().getData().markAsSeen();
-                            angerLevel = angerLevel + hit.collider.gameObject.GetComponent<spt_angerObject>().getData().getAnger();
-                            if (angerLevel >= 100)
-                                attack();
-                            return (true);
-                        }
+                        return (true);
                     }
                 }
             }
@@ -111,11 +106,28 @@ public class spt_monsterMovement : MonoBehaviour {
         return false;
     }
 
+    
+    // Attack function for the monster.
     private void attack(){
+
+        // Monster can decide to attack or not
         int attackOrNot = Random.Range(0, 2);
+        
+        //If it decides to attack, it sets its next destination to the location of the players.
         if (attackOrNot == 1){
             currentWaypoint = 999;
             agent.SetDestination(GameObject.FindWithTag("Player").transform.position);
         }
+    }
+
+    // Increases the anger by an integer amount.
+    public void updateAnger(int i){
+        angerLevel = angerLevel + i;
+    }
+
+    // Called evey second. Allows anger to depreciate over time.
+    private void angerDepreciation(){
+        if (angerLevel != 0)
+            angerLevel = angerLevel - 1;
     }
 }
