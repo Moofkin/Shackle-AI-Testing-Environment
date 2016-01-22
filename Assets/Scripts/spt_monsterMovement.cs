@@ -8,6 +8,9 @@ using System.Collections;
 
 public class spt_monsterMovement : MonoBehaviour {
 
+    // Handle on the players (so the monster always knows where they are).
+    public GameObject players;
+    
     // Array of waypoints, the graph that holds the waypoints, as well as the script that instantiates the graph itself 
     public Transform[] waypoints;
     private int[][] waypointGraph;
@@ -22,11 +25,16 @@ public class spt_monsterMovement : MonoBehaviour {
     private int angerLevel;
     
     // Used for motivation calculations
-    public GameObject[] thingsThatMakeMonsterAngry;
     private float fieldOfViewDegrees = 110f;
     private int visibilityDistance = 20;
 
     private Text gui;
+
+    // A boolean used to track if the monster has warned the players that it is unhappy
+    private bool hasGivenWarning;
+
+    private int upperThreshold = 150;
+    private int lowerThreshold = 100;
 
     // Use this for initialization
 	void Start () {
@@ -57,7 +65,7 @@ public class spt_monsterMovement : MonoBehaviour {
         }
 
         //If the monster is past a certain amount of anger, initiate an attack.
-        if (angerLevel >= 100)
+        if (angerLevel >= lowerThreshold)
             attack();
 
         // Update the GUI with the current anger level of the monster.
@@ -97,7 +105,6 @@ public class spt_monsterMovement : MonoBehaviour {
 
                     // Makes sure the object being looked at is visible to the monster
                     if (hit.collider.gameObject.GetComponent<spt_angerObject>().getData().getVisible()){
-                        print("Can see " + hit.collider.gameObject.name);
                         return (true);
                     }
                 }
@@ -111,12 +118,22 @@ public class spt_monsterMovement : MonoBehaviour {
     private void attack(){
 
         // Monster can decide to attack or not
-        int attackOrNot = Random.Range(0, 2);
+        int attackOrNot = Random.Range(0, 3);
         
-        //If it decides to attack, it sets its next destination to the location of the players.
-        if (attackOrNot == 1){
-            currentWaypoint = 999;
-            agent.SetDestination(GameObject.FindWithTag("Player").transform.position);
+        // the monster will attack if the random number allows it, or if its anger has exceeded the top bound of its threshold.
+        if (attackOrNot == 0 || (angerLevel >= upperThreshold)){
+            
+            // If the monster has not already warned the players of its anger, it does. 
+            if (hasGivenWarning == false){
+                // Play warning noise.
+                hasGivenWarning = true;
+            }
+            
+            // If the players have already been warned, it will attack
+            else{
+                currentWaypoint = 999;
+                agent.SetDestination(players.transform.position);
+            }
         }
     }
 
@@ -129,5 +146,10 @@ public class spt_monsterMovement : MonoBehaviour {
     private void angerDepreciation(){
         if (angerLevel != 0)
             angerLevel = angerLevel - 1;
+        
+        // If the level of anger dips a bit below the bottom threshold, the monster will need to warn the players again if it gets angry.
+        //  (This happens before it is allowed to actually attack).
+        if (angerLevel <= (lowerThreshold - 10))
+            hasGivenWarning = false;
     }
 }

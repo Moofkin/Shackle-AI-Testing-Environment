@@ -92,12 +92,16 @@ public class spt_angerObject : MonoBehaviour {
             if (monster.canSeeSomething(transform)) {
                 
                 // Add additional anger if the monster can observe the action taking place
-                print("monster can see" + name);
                 monster.updateAnger(data.getAngerIncrease());
             }
             
             // Add base amount of anger for the action happening
             monster.updateAnger(data.getAngerIncrease());
         }
+    }
+
+    // Allows you to easily move this object to another position in 3D space.
+    public void moveObject(Transform pos){
+        this.transform.position = pos.position;
     }
 }
