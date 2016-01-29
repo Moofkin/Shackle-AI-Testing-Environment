@@ -62,6 +62,7 @@ public class spt_monsterMovement : MonoBehaviour {
         InvokeRepeating("angerDepreciation", 1, 1);
 
         writer = new StreamWriter("DataDump/aiSnapshotDataDump.txt");
+        writer.WriteLine("Datetime,Elapsed Time (in Seconds),Current Waypoint,Anger Level");
         InvokeRepeating("snapshot", 1, 1);
 	}
 	
