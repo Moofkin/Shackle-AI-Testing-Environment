@@ -5,6 +5,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.IO;
+using System;
 
 public class spt_monsterMovement : MonoBehaviour {
 
@@ -36,6 +38,10 @@ public class spt_monsterMovement : MonoBehaviour {
     private int upperThreshold = 150;
     private int lowerThreshold = 100;
 
+    // The writer for the data dump and the amount of elapsed time (in seconds) of the current playthrough.
+    private StreamWriter writer;
+    private int elapsedTime = 0;
+
     // Use this for initialization
 	void Start () {
 
@@ -54,6 +60,9 @@ public class spt_monsterMovement : MonoBehaviour {
 
         //Begins the gradual anger depreciation over time.
         InvokeRepeating("angerDepreciation", 1, 1);
+
+        writer = new StreamWriter("DataDump/aiSnapshotDataDump.txt");
+        InvokeRepeating("snapshot", 1, 1);
 	}
 	
 	// Update is called once per frame
@@ -76,7 +85,7 @@ public class spt_monsterMovement : MonoBehaviour {
     //  This is dependant on the graph of waypoints which is created in  the spt_createGraphFor... scripts.
     void chooseDestination(){
         int numOptions = waypointGraph[currentWaypoint].Length;
-        int newDestination = Random.Range(0, numOptions);
+        int newDestination = UnityEngine.Random.Range(0, numOptions);
         currentWaypoint = waypointGraph[currentWaypoint][newDestination];
         agent.SetDestination(waypoints[currentWaypoint].position);
     }
@@ -118,7 +127,7 @@ public class spt_monsterMovement : MonoBehaviour {
     private void attack(){
 
         // Monster can decide to attack or not
-        int attackOrNot = Random.Range(0, 3);
+        int attackOrNot = UnityEngine.Random.Range(0, 3);
         
         // the monster will attack if the random number allows it, or if its anger has exceeded the top bound of its threshold.
         if (attackOrNot == 0 || (angerLevel >= upperThreshold)){
@@ -151,5 +160,14 @@ public class spt_monsterMovement : MonoBehaviour {
         //  (This happens before it is allowed to actually attack).
         if (angerLevel <= (lowerThreshold - 10))
             hasGivenWarning = false;
+    }
+    
+    private void snapshot(){
+        elapsedTime = elapsedTime + 1;
+        writer.WriteLine(DateTime.Now + "," + elapsedTime + "," + currentWaypoint + "," + angerLevel);
+    }
+
+    void OnApplicationQuit(){
+        writer.Close();
     }
 }
